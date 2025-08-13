@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weather demo</title>
+  <style>
+    :root { font-family: system-ui, Arial, sans-serif; }
+    body { max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    h1 { margin-bottom: 8px; }
+    form { display: flex; gap: 8px; margin: 16px 0 24px; }
+    input[type="text"] { flex: 1; padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; }
+    button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
+    button { background: #2563eb; color: white; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+    .muted { color: #6b7280; font-size: 12px; }
+    #error { color: #b91c1c; margin-top: 8px; }
+    #loading { font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Weather lookup</h1>
+  <p class="muted">Type a city (e.g., <em>Singapore</em>) and press Enter.</p>
+
+  <form id="weatherForm">
+    <input id="city" type="text" placeholder="Enter city name" required />
+    <button type="submit">Get weather</button>
+  </form>
+
+  <div id="loading" hidden>Loading…</div>
+  <div id="error"></div>
+  <div id="result" class="card" hidden></div>
+
+  <script>
+    const form = document.getElementById('weatherForm');
+    const cityInput = document.getElementById('city');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const result = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const city = cityInput.value.trim();
+      if (!city) return;
+
+      error.textContent = '';
+      result.hidden = true;
+      loading.hidden = false;
+
+      try {
+        const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+
+        result.innerHTML = `
+          <h2>${data.city}, ${data.country}</h2>
+          <p><strong>${Math.round(data.temperature)}°C</strong> — ${data.description}</p>
+          <p>Feels like: ${Math.round(data.feelsLike)}°C · Humidity: ${data.humidity}%</p>
+        `;
+        result.hidden = false;
+      } catch (err) {
+        error.textContent = `Error: ${err.message}`;
+      } finally {
+        loading.hidden = true;
+      }
+    });
+  </script>
+</body>
+</html>
