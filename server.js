@@ -97,6 +97,10 @@ app.get('/health', (req, res) => {
   res.status(200).send('Backend is healthy!');
 });
 
+app.get('/', (req, res) => {
+  res.status(200).send('weather-backend OK. Try /health or /api/weather?city=London');
+});
+
 // Start the server — bind to 0.0.0.0 so it’s reachable in the container
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend server listening on port ${PORT}`);
